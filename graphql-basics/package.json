@@ -13,6 +13,7 @@
     "babel-cli": "^6.26.0"
   },
   "dependencies": {
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "braces": "^2.3.2",
     "graphql-yoga": "^1.17.4",
