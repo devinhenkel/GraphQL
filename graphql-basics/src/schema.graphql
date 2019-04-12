@@ -1,0 +1,43 @@
+type Query {
+    me: Person!
+    post(id: ID!): Post!
+    posts(query: String, sort: String, sortdir: Int): [Post!]
+    people(query: String): [Person]
+    person(id: ID!): Person!
+    comments: [Comment]
+    comment(id: ID!): Comment!
+    grades: [Int!]!
+    add(numbers: [Float!]!): Float!
+}
+
+type Mutation {
+    createPerson(firstname: String!, lastname: String!, email: String!): Person!
+    addPost(title: String!, body: String, author: ID!): Post!
+    setPostStatus(id: ID!, published: Boolean): Post!
+    addComment(text: String!, author: ID!, post: ID!): Comment!
+}
+
+type Person {
+    id: ID!
+    firstname: String!
+    lastname: String!
+    email: String!
+    posts: [Post]
+    comments: [Comment]
+}
+
+type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+    author: Person!
+    comments: [Comment]
+}
+
+type Comment {
+    id: ID!
+    text: String!
+    author: Person!
+    post: Post!
+}

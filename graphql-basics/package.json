@@ -16,6 +16,7 @@
     "babel-preset-env": "^1.7.0",
     "braces": "^2.3.2",
     "graphql-yoga": "^1.17.4",
-    "nodemon": "^1.18.10"
+    "nodemon": "^1.18.10",
+    "uuid": "^3.3.2"
   }
 }
