@@ -11,10 +11,58 @@ type Query {
 }
 
 type Mutation {
-    createPerson(firstname: String!, lastname: String!, email: String!): Person!
-    addPost(title: String!, body: String, author: ID!): Post!
+    createPerson(data: CreatePersonInput): Person!
+    deletePerson(id: ID!): Person!
+    updatePerson(id: ID!, data: UpdatePersonInput!): Person!
+    addPost(data: AddPostInput): Post!
+    deletePost(id: ID!): Post!
+    updatePost(id: ID!, data: UpdatePostInput!): Post!
     setPostStatus(id: ID!, published: Boolean): Post!
-    addComment(text: String!, author: ID!, post: ID!): Comment!
+    addComment(data: AddCommentInput): Comment!
+    deleteComment(id: ID!): Comment!
+    updateComment(id: ID!, data: UpdateCommentInput!): Comment!
+}
+
+type Subscription {
+    comments(postId: ID!): CommentSubscriptionPayload!
+    posts: PostSubscriptionPayload!
+}
+
+input CreatePersonInput {
+    firstname: String!
+    lastname: String!
+    email: String!
+}
+
+input UpdatePersonInput {
+    firstname: String
+    lastname: String
+    email: String
+}
+
+input AddPostInput {
+    title: String!
+    body: String!
+    author: ID!
+}
+
+input UpdatePostInput {
+    title: String
+    body: String
+    author: ID
+    published: Boolean
+}
+
+input AddCommentInput {
+    text: String!
+    author: ID!
+    post: ID!
+}
+
+input UpdateCommentInput {
+    text: String
+    author: ID
+    post: ID
 }
 
 type Person {
@@ -40,4 +88,14 @@ type Comment {
     text: String!
     author: Person!
     post: Post!
+}
+
+type PostSubscriptionPayload {
+    mutation: String!
+    data: Post!
+}
+
+type CommentSubscriptionPayload {
+    mutation: String!
+    data: Comment!
 }
