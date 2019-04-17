@@ -71,12 +71,12 @@ const Mutation = {
             throw new Error('Post not found')
         }
 
-        const deletedPost = db.POSTS.splice(postIndex, 1)
+        const [deletedPost] = db.POSTS.splice(postIndex, 1)
         db.COMMENTS = db.COMMENTS.filter((comment) => comment.post !== args.id)
-        if(deletedPost[0].published){
-            pubsub.publish(`posts`, { posts: {mutation: 'DELETED', data: deletedPost[0]}})
+        if(deletedPost.published){
+            pubsub.publish(`posts`, { posts: {mutation: 'DELETED', data: deletedPost}})
         }
-        return deletedPost[0]
+        return deletedPost
     },
     updatePost(parent, args, { db, pubsub }, info) {
         const postIndex = db.POSTS.findIndex((post) => post.id === args.id)
@@ -128,11 +128,11 @@ const Mutation = {
             throw new Error('Comment not found')
         }
 
-        const deletedComment = db.COMMENTS.splice(commentIndex, 1)
-        pubsub.publish(`comment-${deletedComment[0].post}`, {
-            comments: {mutation: 'DELETED', data: deletedComment[0]}
+        const [deletedComment] = db.COMMENTS.splice(commentIndex, 1)
+        pubsub.publish(`comment-${deletedComment.post}`, {
+            comments: {mutation: 'DELETED', data: deletedComment}
         })
-        return deletedComment[0]
+        return deletedComment
     },
     updateComment(parent, args, { db, pubsub }, info) {
         const commentIndex = db.COMMENTS.findIndex((comment) => comment.id === args.id)

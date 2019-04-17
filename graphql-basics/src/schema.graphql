@@ -90,12 +90,18 @@ type Comment {
     post: Post!
 }
 
+enum ContentAction {
+    CREATED
+    UPDATED
+    DELETED
+}
+
 type PostSubscriptionPayload {
-    mutation: String!
+    mutation: ContentAction!
     data: Post!
 }
 
 type CommentSubscriptionPayload {
-    mutation: String!
+    mutation: ContentAction!
     data: Comment!
 }
