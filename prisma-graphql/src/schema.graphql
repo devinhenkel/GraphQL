@@ -1,0 +1,107 @@
+type Query {
+    me: Person!
+    post(id: ID!): Post!
+    posts(query: String, sort: String, sortdir: Int): [Post!]
+    people(query: String): [Person]
+    person(id: ID!): Person!
+    comments: [Comment]
+    comment(id: ID!): Comment!
+    grades: [Int!]!
+    add(numbers: [Float!]!): Float!
+}
+
+type Mutation {
+    createPerson(data: CreatePersonInput): Person!
+    deletePerson(id: ID!): Person!
+    updatePerson(id: ID!, data: UpdatePersonInput!): Person!
+    addPost(data: AddPostInput): Post!
+    deletePost(id: ID!): Post!
+    updatePost(id: ID!, data: UpdatePostInput!): Post!
+    setPostStatus(id: ID!, published: Boolean): Post!
+    addComment(data: AddCommentInput): Comment!
+    deleteComment(id: ID!): Comment!
+    updateComment(id: ID!, data: UpdateCommentInput!): Comment!
+}
+
+type Subscription {
+    comments(postId: ID!): CommentSubscriptionPayload!
+    posts: PostSubscriptionPayload!
+}
+
+input CreatePersonInput {
+    firstname: String!
+    lastname: String!
+    email: String!
+}
+
+input UpdatePersonInput {
+    firstname: String
+    lastname: String
+    email: String
+}
+
+input AddPostInput {
+    title: String!
+    body: String!
+    author: ID!
+}
+
+input UpdatePostInput {
+    title: String
+    body: String
+    author: ID
+    published: Boolean
+}
+
+input AddCommentInput {
+    text: String!
+    author: ID!
+    post: ID!
+}
+
+input UpdateCommentInput {
+    text: String
+    author: ID
+    post: ID
+}
+
+type Person {
+    id: ID!
+    firstname: String!
+    lastname: String!
+    email: String!
+    posts: [Post]
+    comments: [Comment]
+}
+
+type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+    author: Person!
+    comments: [Comment]
+}
+
+type Comment {
+    id: ID!
+    text: String!
+    author: Person!
+    post: Post!
+}
+
+enum ContentAction {
+    CREATED
+    UPDATED
+    DELETED
+}
+
+type PostSubscriptionPayload {
+    mutation: ContentAction!
+    data: Post!
+}
+
+type CommentSubscriptionPayload {
+    mutation: ContentAction!
+    data: Comment!
+}
