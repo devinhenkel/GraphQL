@@ -1,29 +1,57 @@
 import uuid from 'uuid/v4'
 
 const Mutation = {
-    async createUser(parent, args, { prisma }, info) {
-        const emailTaken = await prisma.exists.User({ email: args.data.email })
+    createPerson(parent, args, { db }, info) {
+        const emailTaken = db.PEOPLE.some((person) => person.email === args.data.email)
         if (emailTaken) {
             throw new Error('Email taken.')
         }
-
-        return prisma.mutation.createUser({ data: args.data }, info)
+        
+        const newUser = {
+            id: uuid(),
+            ...args.data
+        }
+        db.PEOPLE.push(newUser) 
+        return newUser
+        
     },
-    async deleteUser(parent, args, { db }, info) {
-        const userExists = await prisma.exists.User({id: args.data.id})
-        if (!userExists){
+    deletePerson(parent, args, { db }, info) {
+        const personIndex = db.PEOPLE.findIndex((person) => person.id === args.id)
+        if (personIndex === -1) {
             throw new Error('User not found')
         }
 
-        return prisma.mutation.deleteUser({data:args.data}, info)
+        const deletedPerson = db.PEOPLE.splice(personIndex, 1)
+
+        db.POSTS = db.POSTS.filter((post) => {
+            const match = post.author === args.id
+
+            if (match) {
+                db.COMMENTS = db.COMMENTS.filter((comment) => comment.post !== post.id)
+            }
+
+            return !match
+        })
+        db.COMMENTS = db.COMMENTS.filter((comment) => comment.author !== args.id)
+
+        return deletedPerson[0]
     },
-    async updateUser(parent, args, { db }, info) {
-        const userExists = await prisma.exists.User({id: args.data.id})
-        if (!userExists){
+    updatePerson(parent, args, { db }, info) {
+        const personIndex = db.PEOPLE.findIndex((person) => person.id === args.id)
+        if (personIndex === -1) {
             throw new Error('User not found')
         }
 
-        return prisma.mutation.updateUser({data:args.data}, info)
+        if (typeof args.data.email === 'string') {
+            const emailTaken = db.PEOPLE.some((person) => person.email === args.data.email)
+            if(emailTaken) {
+                throw new Error('Email taken')
+            }
+        }
+
+        db.PEOPLE[personIndex] = Object.assign(db.PEOPLE[personIndex], args.data)
+
+        return db.PEOPLE[personIndex]
     },
     addPost(parent, args, { db, pubsub }, info) {
         const userExists = db.PEOPLE.some((person) => person.id === args.data.author)

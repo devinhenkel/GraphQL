@@ -1,0 +1,36 @@
+type User {
+  id: ID! @unique
+  username: String! @unique
+  email: String! @unique
+  projects: [Project]!
+}
+
+type Project {
+  id: ID! @unique
+  title: String!
+  description: String
+  issues: [Issue]!
+  team: [User]!
+}
+
+type Issue {
+  id: ID! @unique
+  title: String!
+  description: String
+  severity: Severity
+  type: IssueType!
+  owner: User!
+  project: [Project!]!
+}
+
+enum Severity {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum IssueType {
+  RISK 
+  ASSUMPTION
+  QUESTION
+}

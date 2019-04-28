@@ -1,9 +1,9 @@
 type Query {
-    me: Person!
+    me: User!
     post(id: ID!): Post!
     posts(query: String, sort: String, sortdir: Int): [Post!]
-    people(query: String): [Person]
-    person(id: ID!): Person!
+    users(query: String): [User]
+    user(id: ID!): User!
     comments: [Comment]
     comment(id: ID!): Comment!
     grades: [Int!]!
@@ -11,9 +11,9 @@ type Query {
 }
 
 type Mutation {
-    createPerson(data: CreatePersonInput): Person!
-    deletePerson(id: ID!): Person!
-    updatePerson(id: ID!, data: UpdatePersonInput!): Person!
+    createUser(data: CreateUserInput): User!
+    deleteUser(id: ID!): User!
+    updateUser(id: ID!, data: UpdateUserInput!): User!
     addPost(data: AddPostInput): Post!
     deletePost(id: ID!): Post!
     updatePost(id: ID!, data: UpdatePostInput!): Post!
@@ -28,13 +28,13 @@ type Subscription {
     posts: PostSubscriptionPayload!
 }
 
-input CreatePersonInput {
+input CreateUserInput {
     firstname: String!
     lastname: String!
     email: String!
 }
 
-input UpdatePersonInput {
+input UpdateUserInput {
     firstname: String
     lastname: String
     email: String
@@ -65,7 +65,7 @@ input UpdateCommentInput {
     post: ID
 }
 
-type Person {
+type User {
     id: ID!
     firstname: String!
     lastname: String!
@@ -79,14 +79,14 @@ type Post {
     title: String!
     body: String!
     published: Boolean!
-    author: Person!
+    author: User!
     comments: [Comment]
 }
 
 type Comment {
     id: ID!
     text: String!
-    author: Person!
+    author: User!
     post: Post!
 }
 

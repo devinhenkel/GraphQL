@@ -6,47 +6,47 @@ const Query = {
     post: (parent, args, { db }, info) => {
         return db.POSTS.find((post)=> post.id === args.id)
     },
-    posts: (parent, args, { db }, info) => {
-        let filteredPosts = ''
-        if (!args.query) {
-            filteredPosts = db.POSTS
-        } else {
-            filteredPosts = db.POSTS.filter((post) => {
-                return post.title.toLowerCase().includes(args.query.toLowerCase()) ||
-                post.body.toLowerCase().includes(args.query.toLowerCase())
-            })
-        }
-        if (!args.sort) {
-            return filteredPosts
-        }
+    posts: (parent, args, { db, prisma }, info) => {
+        const opArgs = {}
 
-        return filteredPosts.sort((a,b) => {
-            if (args.sortdir === -1) {
-                return (a[args.sort] < b[args.sort]) ? 1 : ((b[args.sort] < a[args.sort]) ? -1 : 0)
-            } else {
-                return (a[args.sort] > b[args.sort]) ? 1 : ((b[args.sort] > a[args.sort]) ? -1 : 0)
+        if (args.query) {
+            opArgs.where = {
+                OR:[
+                    {title_contains: args.query},
+                    {title_contains: args.query.toUpperCase()},
+                    {title_contains: args.query.toLowerCase()},
+                    {body_contains: args.query},
+                    {body_contains: args.query.toUpperCase()},
+                    {body_contains: args.query.toUpperCase()}
+                ]
             }
-            
-        })
+        }
+        return prisma.query.posts(opArgs, info)
     },
-    people: (parent, args, { db }, info) => {
-        if (!args.query) {
-            return db.PEOPLE
-        } 
-        
-        return db.PEOPLE.filter((person) => {
-            return person.lastname.toLowerCase().includes(args.query.toLowerCase()) || 
-            person.firstname.toLowerCase().includes(args.query.toLowerCase()) || 
-            person.email.toLowerCase().includes(args.query.toLowerCase())
+    users: (parent, args, { db, prisma }, info) => {
+        const opArgs = {}
 
-        })
+        if (args.query) {
+            opArgs.where = {
+                OR:[
+                    {firstname_contains: args.query},
+                    {firstname_contains: args.query.toUpperCase()},
+                    {firstname_contains: args.query.toLowerCase()},
+                    {lastname_contains: args.query},
+                    {lastname_contains: args.query.toUpperCase()},
+                    {lastname_contains: args.query.toUpperCase()}
+                ]
+            }
+        }
+        return prisma.query.users(opArgs, info)
         
     },
-    person: (parent, args, { db }, info) => {
+    user: (parent, args, { db }, info) => {
         return db.PEOPLE.find((person)=> person.id === args.id)
     },
-    comments(parent, args, { db }, info) {
-        return db.COMMENTS
+    comments(parent, args, { db, prisma }, info) {
+        return prisma.query.comments(null, info)
+        /* return db.COMMENTS */
     },
     comment: (parent, args, { db }, info) => {
         return db.COMMENTS.find((comment)=> comment.id === args.id)
