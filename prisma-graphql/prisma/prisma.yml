@@ -1,2 +1,3 @@
 endpoint: http://localhost:4466
 datamodel: datamodel.prisma
+secret: d7e01978-66b3-4614-a4e5-f13c19af590e

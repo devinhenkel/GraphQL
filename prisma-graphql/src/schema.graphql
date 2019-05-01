@@ -3,8 +3,8 @@ type Query {
     post(id: ID!): Post!
     posts(query: String, sort: String, sortdir: Int): [Post!]
     users(query: String): [User]
-    user(id: ID!): User!
-    comments: [Comment]
+    user(where: UserWhereUniqueInput): User
+    comments(where: CommentWhereInput): [Comment]
     comment(id: ID!): Comment!
     grades: [Int!]!
     add(numbers: [Float!]!): Float!
@@ -14,17 +14,17 @@ type Mutation {
     createUser(data: CreateUserInput): User!
     deleteUser(id: ID!): User!
     updateUser(id: ID!, data: UpdateUserInput!): User!
-    addPost(data: AddPostInput): Post!
+    createPost(data: AddPostInput): Post!
     deletePost(id: ID!): Post!
     updatePost(id: ID!, data: UpdatePostInput!): Post!
     setPostStatus(id: ID!, published: Boolean): Post!
-    addComment(data: AddCommentInput): Comment!
+    createComment(data: AddCommentInput): Comment!
     deleteComment(id: ID!): Comment!
     updateComment(id: ID!, data: UpdateCommentInput!): Comment!
 }
 
 type Subscription {
-    comments(postId: ID!): CommentSubscriptionPayload!
+    comments(postId: ID): CommentSubscriptionPayload!
     posts: PostSubscriptionPayload!
 }
 
@@ -57,6 +57,22 @@ input AddCommentInput {
     text: String!
     author: ID!
     post: ID!
+}
+
+input CommentWhereInput {
+    id: ID
+    text_contains: String
+}
+
+input UserWhereInput {
+    id: ID
+    firstname_contains: String
+    lastname_contains: String
+}
+
+input UserWhereUniqueInput {
+  id: ID
+  email: String
 }
 
 input UpdateCommentInput {
@@ -103,5 +119,5 @@ type PostSubscriptionPayload {
 
 type CommentSubscriptionPayload {
     mutation: ContentAction!
-    data: Comment!
+    node: Comment
 }

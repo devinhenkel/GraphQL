@@ -23,7 +23,7 @@ const Query = {
         }
         return prisma.query.posts(opArgs, info)
     },
-    users: (parent, args, { db, prisma }, info) => {
+    users: (parent, args, { prisma }, info) => {
         const opArgs = {}
 
         if (args.query) {
@@ -41,11 +41,19 @@ const Query = {
         return prisma.query.users(opArgs, info)
         
     },
-    user: (parent, args, { db }, info) => {
-        return db.PEOPLE.find((person)=> person.id === args.id)
+    user: (parent, args, { prisma }, info) => {
+        let opArgs = {}
+        if(args.where) {
+            opArgs.where = args.where
+        }
+        return prisma.query.user(opArgs, info)
     },
     comments(parent, args, { db, prisma }, info) {
-        return prisma.query.comments(null, info)
+        let opArgs = {}
+        if(args.where) {
+            opArgs.where = args.where
+        }
+        return prisma.query.comments(opArgs, info)
         /* return db.COMMENTS */
     },
     comment: (parent, args, { db }, info) => {
