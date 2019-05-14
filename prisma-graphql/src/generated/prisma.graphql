@@ -1,5 +1,5 @@
 # source: http://localhost:4466
-# timestamp: Sat Apr 27 2019 14:22:36 GMT-0500 (Central Daylight Time)
+# timestamp: Fri May 03 2019 21:44:27 GMT-0500 (Central Daylight Time)
 
 type AggregateComment {
   count: Int!
@@ -943,6 +943,13 @@ type Query {
   ): Node
 }
 
+enum Role {
+  USER
+  EDITOR
+  REVIEWER
+  ADMIN
+}
+
 type Subscription {
   user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
   post(where: PostSubscriptionWhereInput): PostSubscriptionPayload
@@ -951,11 +958,14 @@ type Subscription {
 
 type User implements Node {
   id: ID!
-  firstname: String!
-  lastname: String!
+  username: String!
+  firstname: String
+  lastname: String
   email: String!
+  password: String!
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post!]
   comments(where: CommentWhereInput, orderBy: CommentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Comment!]
+  roles: [Role!]!
 }
 
 """A connection to a list of items."""
@@ -970,9 +980,12 @@ type UserConnection {
 
 input UserCreateInput {
   id: ID
-  firstname: String!
-  lastname: String!
+  username: String!
+  firstname: String
+  lastname: String
   email: String!
+  password: String!
+  roles: UserCreaterolesInput
   posts: PostCreateManyWithoutAuthorInput
   comments: CommentCreateManyWithoutAuthorInput
 }
@@ -987,19 +1000,29 @@ input UserCreateOneWithoutPostsInput {
   connect: UserWhereUniqueInput
 }
 
+input UserCreaterolesInput {
+  set: [Role!]
+}
+
 input UserCreateWithoutCommentsInput {
   id: ID
-  firstname: String!
-  lastname: String!
+  username: String!
+  firstname: String
+  lastname: String
   email: String!
+  password: String!
+  roles: UserCreaterolesInput
   posts: PostCreateManyWithoutAuthorInput
 }
 
 input UserCreateWithoutPostsInput {
   id: ID
-  firstname: String!
-  lastname: String!
+  username: String!
+  firstname: String
+  lastname: String
   email: String!
+  password: String!
+  roles: UserCreaterolesInput
   comments: CommentCreateManyWithoutAuthorInput
 }
 
@@ -1015,12 +1038,16 @@ type UserEdge {
 enum UserOrderByInput {
   id_ASC
   id_DESC
+  username_ASC
+  username_DESC
   firstname_ASC
   firstname_DESC
   lastname_ASC
   lastname_DESC
   email_ASC
   email_DESC
+  password_ASC
+  password_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -1029,9 +1056,12 @@ enum UserOrderByInput {
 
 type UserPreviousValues {
   id: ID!
-  firstname: String!
-  lastname: String!
+  username: String!
+  firstname: String
+  lastname: String
   email: String!
+  password: String!
+  roles: [Role!]!
 }
 
 type UserSubscriptionPayload {
@@ -1072,17 +1102,23 @@ input UserSubscriptionWhereInput {
 }
 
 input UserUpdateInput {
+  username: String
   firstname: String
   lastname: String
   email: String
+  password: String
+  roles: UserUpdaterolesInput
   posts: PostUpdateManyWithoutAuthorInput
   comments: CommentUpdateManyWithoutAuthorInput
 }
 
 input UserUpdateManyMutationInput {
+  username: String
   firstname: String
   lastname: String
   email: String
+  password: String
+  roles: UserUpdaterolesInput
 }
 
 input UserUpdateOneRequiredWithoutCommentsInput {
@@ -1099,17 +1135,27 @@ input UserUpdateOneRequiredWithoutPostsInput {
   upsert: UserUpsertWithoutPostsInput
 }
 
+input UserUpdaterolesInput {
+  set: [Role!]
+}
+
 input UserUpdateWithoutCommentsDataInput {
+  username: String
   firstname: String
   lastname: String
   email: String
+  password: String
+  roles: UserUpdaterolesInput
   posts: PostUpdateManyWithoutAuthorInput
 }
 
 input UserUpdateWithoutPostsDataInput {
+  username: String
   firstname: String
   lastname: String
   email: String
+  password: String
+  roles: UserUpdaterolesInput
   comments: CommentUpdateManyWithoutAuthorInput
 }
 
@@ -1172,6 +1218,46 @@ input UserWhereInput {
 
   """All values not ending with the given string."""
   id_not_ends_with: ID
+  username: String
+
+  """All values that are not equal to given value."""
+  username_not: String
+
+  """All values that are contained in given list."""
+  username_in: [String!]
+
+  """All values that are not contained in given list."""
+  username_not_in: [String!]
+
+  """All values less than the given value."""
+  username_lt: String
+
+  """All values less than or equal the given value."""
+  username_lte: String
+
+  """All values greater than the given value."""
+  username_gt: String
+
+  """All values greater than or equal the given value."""
+  username_gte: String
+
+  """All values containing the given string."""
+  username_contains: String
+
+  """All values not containing the given string."""
+  username_not_contains: String
+
+  """All values starting with the given string."""
+  username_starts_with: String
+
+  """All values not starting with the given string."""
+  username_not_starts_with: String
+
+  """All values ending with the given string."""
+  username_ends_with: String
+
+  """All values not ending with the given string."""
+  username_not_ends_with: String
   firstname: String
 
   """All values that are not equal to given value."""
@@ -1292,6 +1378,46 @@ input UserWhereInput {
 
   """All values not ending with the given string."""
   email_not_ends_with: String
+  password: String
+
+  """All values that are not equal to given value."""
+  password_not: String
+
+  """All values that are contained in given list."""
+  password_in: [String!]
+
+  """All values that are not contained in given list."""
+  password_not_in: [String!]
+
+  """All values less than the given value."""
+  password_lt: String
+
+  """All values less than or equal the given value."""
+  password_lte: String
+
+  """All values greater than the given value."""
+  password_gt: String
+
+  """All values greater than or equal the given value."""
+  password_gte: String
+
+  """All values containing the given string."""
+  password_contains: String
+
+  """All values not containing the given string."""
+  password_not_contains: String
+
+  """All values starting with the given string."""
+  password_starts_with: String
+
+  """All values not starting with the given string."""
+  password_not_starts_with: String
+
+  """All values ending with the given string."""
+  password_ends_with: String
+
+  """All values not ending with the given string."""
+  password_not_ends_with: String
   posts_every: PostWhereInput
   posts_some: PostWhereInput
   posts_none: PostWhereInput

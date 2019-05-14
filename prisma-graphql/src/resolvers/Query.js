@@ -1,13 +1,30 @@
+import jwt from 'jsonwebtoken'
+import getUserId, {getUserRoles, getUserAdmin} from '../utils/getuserid'
+
 const Query = {
-    me() {
-        return db.PEOPLE.find((person)=> person.id === "444")
+    async me(parent, args, {prisma, request}, info) {
+        const userId = getUserId(request)
+        
+        const userRoles = await getUserAdmin(request, prisma)
+
+        let opArgs = {}
+        opArgs.where = { id: userId }
+        return await prisma.query.user(opArgs, info)
     },
     // passed props (parent, args, context[state], info)
-    post: (parent, args, { db }, info) => {
-        return db.POSTS.find((post)=> post.id === args.id)
+    async post(parent, args, { prisma, request }, info) {
+        const userId = await getUserId(request, false)
+        let opArgs = {}
+
+        opArgs.where = {
+            id: args.where.id
+        }
+        return prisma.query.post(opArgs, info)
     },
-    posts: (parent, args, { db, prisma }, info) => {
-        const opArgs = {}
+    async posts(parent, args, { prisma, request }, info) {
+        const userId = getUserId(request, false)
+        
+        let opArgs = {}
 
         if (args.query) {
             opArgs.where = {
@@ -21,10 +38,69 @@ const Query = {
                 ]
             }
         }
+
+        if (!userId) {
+            opArgs.where = {
+                ...opArgs.where,
+                published: true
+            }
+            return prisma.query.posts(opArgs, info)
+        }
+
+        const isAdmin = await getUserAdmin(prisma, userId)
+        
+        if (!isAdmin){
+            opArgs.where = {
+                ...opArgs.where,
+                OR: [
+                    {
+                        author: {
+                            id: userId
+                        }
+                    },
+                    { published: true}
+                ]
+            }
+        }
         return prisma.query.posts(opArgs, info)
     },
-    users: (parent, args, { prisma }, info) => {
+    async myPosts(parent, args, {prisma, request}, info) {
+        const userId = getUserId(request)
+
+        let opArgs = {}
+        
+        opArgs.where = {
+            author: {
+                id: userId
+            }
+        }
+
+        if (args.query) {
+            opArgs.where = {
+                ...opArgs.where,
+                OR:[
+                    {title_contains: args.query},
+                    {title_contains: args.query.toUpperCase()},
+                    {title_contains: args.query.toLowerCase()},
+                    {body_contains: args.query},
+                    {body_contains: args.query.toUpperCase()},
+                    {body_contains: args.query.toUpperCase()}
+                ]
+            }
+        }
+        return await prisma.query.posts(opArgs, info)
+
+    },
+    async users(parent, args, { prisma, request }, info) {
+        const userId = getUserId(request, false)
+        const isAdmin = await getUserAdmin(prisma, userId)
+
         const opArgs = {}
+
+        /* if (!isAdmin) {
+            opArgs.where = { id: userId }
+            return prisma.query.users(opArgs, info)
+        }  */
 
         if (args.query) {
             opArgs.where = {

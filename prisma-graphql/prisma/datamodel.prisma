@@ -1,10 +1,20 @@
 type User {
   id: ID! @unique
-  firstname: String!
-  lastname: String!
+  username: String!
+  firstname: String
+  lastname: String
   email: String! @unique
+  password: String!
   posts: [Post!]! @relation(name: "PostByUser", onDelete: CASCADE)
   comments: [Comment!]! @relation(name:"CommentByUser", onDelete: CASCADE)
+  roles: [Role]
+}
+
+enum Role {
+  USER
+  EDITOR
+  REVIEWER
+  ADMIN
 }
 
 type Post {

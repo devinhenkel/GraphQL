@@ -1,7 +1,8 @@
 type Query {
     me: User!
-    post(id: ID!): Post!
-    posts(query: String, sort: String, sortdir: Int): [Post!]
+    post(where: PostWhereUniqueInput!): Post
+    posts(id: ID, query: String, sort: String, sortdir: Int): [Post!]
+    myPosts(query: String): [Post]
     users(query: String): [User]
     user(where: UserWhereUniqueInput): User
     comments(where: CommentWhereInput): [Comment]
@@ -11,9 +12,11 @@ type Query {
 }
 
 type Mutation {
-    createUser(data: CreateUserInput): User!
+    createUser(data: CreateUserInput): AuthPayload!
     deleteUser(id: ID!): User!
-    updateUser(id: ID!, data: UpdateUserInput!): User!
+    updateUser(data: UpdateUserInput!): User!
+    updateUserRoles(where: UserWhereUniqueInput!, roles: UpdateUserRolesInput!): User!
+    login(data: LoginInput!): AuthPayload!
     createPost(data: AddPostInput): Post!
     deletePost(id: ID!): Post!
     updatePost(id: ID!, data: UpdatePostInput!): Post!
@@ -28,22 +31,49 @@ type Subscription {
     posts: PostSubscriptionPayload!
 }
 
-input CreateUserInput {
-    firstname: String!
-    lastname: String!
+type AuthPayload {
+    token: String!
+    user: User!
+}
+
+input LoginInput {
     email: String!
+    password: String!
+}
+
+input CreateUserInput {
+    username: String!
+    firstname: String
+    lastname: String
+    email: String!
+    password: String!
 }
 
 input UpdateUserInput {
+    username: String
     firstname: String
     lastname: String
     email: String
+    roles: [Role]
+}
+
+enum Role {
+    USER
+    EDITOR
+    REVIEWER
+    ADMIN
+}
+
+input UpdateUserRolesInput {
+    set: [Role!]
 }
 
 input AddPostInput {
     title: String!
     body: String!
-    author: ID!
+    author: ID
+    published: Boolean
+    
 }
 
 input UpdatePostInput {
@@ -75,6 +105,12 @@ input UserWhereUniqueInput {
   email: String
 }
 
+input PostWhereUniqueInput {
+  id: ID
+}
+
+
+
 input UpdateCommentInput {
     text: String
     author: ID
@@ -83,11 +119,15 @@ input UpdateCommentInput {
 
 type User {
     id: ID!
-    firstname: String!
-    lastname: String!
-    email: String!
+    username: String!
+    firstname: String
+    lastname: String
+    fullname: String
+    email: String
+    password: String!
     posts: [Post]
     comments: [Comment]
+    roles: [Role]
 }
 
 type Post {
