@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import getUserId, {getUserRoles, getUserAdmin} from '../utils/getuserid'
+import getUserToken from '../utils/getToken'
+import { getTokenDesc } from 'graphql/language/lexer';
+import { validatePassword, hashPassword } from '../utils/stringUtils';
 
 /* const token = jwt.sign({ id: '123abc'}, 'mysecretkey')
 console.log(token)
@@ -25,29 +28,23 @@ console.log(verified) */
 dummy() */
 
 const Mutation = {
-    async createUser(parent, args, { prisma }, info) {
-        const passVal = require('password-validator')
-        
-        let schema = new passVal()
-
-        schema
-        .is().min(8)
-        .has().uppercase()
-        .has().lowercase()
-        .has().digits()
+    async createUser(parent, args, { prisma, request }, info) {
+        const userId = getUserId(request)
+        const isAdmin = await getUserAdmin(prisma, userId)
+        if (!isAdmin) {
+            throw new Error('Must be Admin to create users.')
+        }
 
         const emailVal = require('email-validator')
         if(!emailVal.validate(args.data.email)) {
             throw new Error('Please enter a valid email address.')
         }
 
-        //console.log(args.data.password)
-        if(!schema.validate(args.data.password)) {
-            const whyFail = schema.validate(args.data.password, {list: true})
-            throw new Error('Password does not meet requirements. '+whyFail)
+        let password = null
+        
+        if (validatePassword(args.data.password)) {
+            password = await hashPassword(args.data.password)
         }
-
-        const password = await bcrypt.hash(args.data.password, 10)
         
         const user = await prisma.mutation.createUser({ 
             data: {
@@ -58,11 +55,12 @@ const Mutation = {
         //console.log(user)
         return {
             user: user,
-            token: jwt.sign({ userId: user.id}, 'mysecretkey')
+            token: getUserToken(user.id)
         }
     },
     async deleteUser(parent, args, { prisma, request }, info) {
-        const isAdmin = await getUserAdmin(request, prisma)
+        const userId = getUserId(request)
+        const isAdmin = await getUserAdmin(prisma, userId)
         if (!isAdmin) {
             throw new Error('Must be Admin to delete users.')
         }
@@ -83,16 +81,33 @@ const Mutation = {
     },
     async updateUser(parent, args, { prisma, request }, info) {
         const userId = getUserId(request)
+        const isAdmin = await getUserAdmin(prisma, userId)
+
+        let currentId = userId
+        if (args.where){
+            if (!isAdmin) {
+                throw new Error('You must be an admin to update a user')
+            }
+            if (args.where.id && isAdmin) { currentId = args.where.id }
+        }
+
+        let password = null
+        if (validatePassword(args.data.password)) {
+            password = await hashPassword(args.data.password)
+        }
 
         return prisma.mutation.updateUser({
             where: {
-                id: userId
+                id: currentId
             },
-            data: args.data
+            data: {
+                ...args.data,
+                password: password
+            }
         }, info)
     },
     async updateUserRoles(parent, args, { prisma, request }, info) {
-        const isAdmin = await getUserAdmin(request, prisma)
+        const isAdmin = await getUserAdmin(prisma, userId)
         if (!isAdmin) {
             throw new Error('You are not authorized to perform this action.')
         }
@@ -130,7 +145,7 @@ const Mutation = {
 
         const userPayload = {
             user,
-            token: jwt.sign({ userId: user.id}, 'mysecretkey')
+            token: getUserToken(user.id)
         }
         return userPayload
     },
@@ -152,7 +167,7 @@ const Mutation = {
     },
     async deletePost(parent, args, { prisma, request }, info) {
         const userId = getUserId(request)
-        const isAdmin = await getUserAdmin(request, prisma)
+        const isAdmin = await getUserAdmin(prisma, userId)
 
         const postExists = await prisma.exists.Post({
             id: args.id,
@@ -173,7 +188,7 @@ const Mutation = {
     },
     async updatePost(parent, args, { prisma, request }, info) {
         const userId = getUserId(request)
-        const isAdmin = await getUserAdmin(request, prisma)
+        const isAdmin = await getUserAdmin(prisma, userId)
 
         const postExists = await prisma.exists.Post({
             id: args.id,
@@ -194,6 +209,15 @@ const Mutation = {
         }, info)        
     },
     async createComment(parent, args, { prisma, pubsub }, info) {
+        const postExists = await prisma.exists.Post({id: args.data.post})
+        if (!postExists) {
+            throw new Error('Post does not exist')
+        }
+        const post = await prisma.query.post({ where: { id: args.data.post}})
+        if (!post.published) {
+            throw new Error('Post not ready for comments')
+        }
+
         const newComment = {}
         newComment.text = args.data.text
         newComment.author = {} 

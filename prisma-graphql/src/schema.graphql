@@ -14,7 +14,7 @@ type Query {
 type Mutation {
     createUser(data: CreateUserInput): AuthPayload!
     deleteUser(id: ID!): User!
-    updateUser(data: UpdateUserInput!): User!
+    updateUser(where: UserWhereUniqueInput, data: UpdateUserInput!): User!
     updateUserRoles(where: UserWhereUniqueInput!, roles: UpdateUserRolesInput!): User!
     login(data: LoginInput!): AuthPayload!
     createPost(data: AddPostInput): Post!
@@ -29,6 +29,7 @@ type Mutation {
 type Subscription {
     comments(postId: ID): CommentSubscriptionPayload!
     posts: PostSubscriptionPayload!
+    myPosts: PostSubscriptionPayload!
 }
 
 type AuthPayload {
@@ -54,7 +55,7 @@ input UpdateUserInput {
     firstname: String
     lastname: String
     email: String
-    roles: [Role]
+    password: String
 }
 
 enum Role {
@@ -153,11 +154,11 @@ enum ContentAction {
 }
 
 type PostSubscriptionPayload {
-    mutation: ContentAction!
-    data: Post!
+    mutation: ContentAction
+    node: Post!
 }
 
 type CommentSubscriptionPayload {
-    mutation: ContentAction!
+    mutation: ContentAction
     node: Comment
 }

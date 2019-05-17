@@ -4,8 +4,7 @@ import getUserId, {getUserRoles, getUserAdmin} from '../utils/getuserid'
 const Query = {
     async me(parent, args, {prisma, request}, info) {
         const userId = getUserId(request)
-        
-        const userRoles = await getUserAdmin(request, prisma)
+        const userRoles = await getUserAdmin(prisma, userId)
 
         let opArgs = {}
         opArgs.where = { id: userId }

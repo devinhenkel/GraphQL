@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 
 const getUserId = (request, requireAuth = true) => {
-    const authHeader = request.request.headers.authorization
+    const authHeader = request.request ? request.request.headers.authorization : request.connection.context.Authorization
 
     if (authHeader) {
         const authToken = authHeader.replace('Bearer ', '')
@@ -29,7 +29,6 @@ const getUserRoles = async (request, prisma, requireAuth = true) => {
 
 const getUserAdmin = async (prisma, userId) => {
     let opArgs = {}
-    console.log(userId)
     opArgs.where = {id: userId}
     const currentUser = await prisma.query.user(opArgs, '{username, roles}')
     return currentUser.roles.includes('ADMIN')
