@@ -1,0 +1,171 @@
+# import UserOrderByInput, PostOrderByInput, CommentOrderByInput from './generated/prisma.graphql'
+
+type Query {
+    me: User!
+    post(where: PostWhereUniqueInput!): Post
+    posts(id: ID, query: String, sort: String, sortdir: Int, first: Int, skip: Int, after: String, orderBy: PostOrderByInput): [Post!]
+    myPosts(query: String, first: Int, skip: Int, after: String, orderBy: PostOrderByInput): [Post]
+    users(query: String, first: Int, skip: Int, after: String, orderBy: UserOrderByInput): [User]
+    user(where: UserWhereUniqueInput): User
+    comments(where: CommentWhereInput, first: Int, skip: Int, after: String, orderBy: CommentOrderByInput): [Comment]
+    comment(id: ID!): Comment!
+    grades: [Int!]!
+    add(numbers: [Float!]!): Float!
+}
+
+type Mutation {
+    createUser(data: CreateUserInput): AuthPayload!
+    deleteUser(id: ID!): User!
+    updateUser(where: UserWhereUniqueInput, data: UpdateUserInput!): User!
+    updateUserRoles(where: UserWhereUniqueInput!, roles: UpdateUserRolesInput!): User!
+    login(data: LoginInput!): AuthPayload!
+    createPost(data: AddPostInput): Post!
+    deletePost(id: ID!): Post!
+    updatePost(id: ID!, data: UpdatePostInput!): Post!
+    setPostStatus(id: ID!, published: Boolean): Post!
+    createComment(data: AddCommentInput): Comment!
+    deleteComment(id: ID!): Comment!
+    updateComment(id: ID!, data: UpdateCommentInput!): Comment!
+}
+
+type Subscription {
+    comments(postId: ID): CommentSubscriptionPayload!
+    posts: PostSubscriptionPayload!
+    myPosts: PostSubscriptionPayload!
+}
+
+type AuthPayload {
+    token: String!
+    user: User!
+}
+
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+input CreateUserInput {
+    username: String!
+    firstname: String
+    lastname: String
+    email: String!
+    password: String!
+}
+
+input UpdateUserInput {
+    username: String
+    firstname: String
+    lastname: String
+    email: String
+    password: String
+}
+
+enum Role {
+    USER
+    EDITOR
+    REVIEWER
+    ADMIN
+}
+
+input UpdateUserRolesInput {
+    set: [Role!]
+}
+
+input AddPostInput {
+    title: String!
+    body: String!
+    author: ID
+    published: Boolean
+    
+}
+
+input UpdatePostInput {
+    title: String
+    body: String
+    author: ID
+    published: Boolean
+}
+
+input AddCommentInput {
+    text: String!
+    post: ID!
+}
+
+input CommentWhereInput {
+    id: ID
+    text_contains: String
+}
+
+input UserWhereInput {
+    id: ID
+    firstname_contains: String
+    lastname_contains: String
+}
+
+input UserWhereUniqueInput {
+  id: ID
+  email: String
+}
+
+input PostWhereUniqueInput {
+  id: ID
+}
+
+
+
+input UpdateCommentInput {
+    text: String
+    author: ID
+    post: ID
+}
+
+type User {
+    id: ID!
+    username: String!
+    firstname: String
+    lastname: String
+    fullname: String
+    email: String
+    password: String!
+    posts: [Post]
+    comments: [Comment]
+    roles: [Role]
+    createdAt: String!
+    updatedAt: String!
+}
+
+type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+    author: User!
+    comments: [Comment]
+    createdAt: String!
+    updatedAt: String!
+}
+
+type Comment {
+    id: ID!
+    text: String!
+    author: User!
+    post: Post!
+    createdAt: String!
+    updatedAt: String!
+}
+
+enum ContentAction {
+    CREATED
+    UPDATED
+    DELETED
+}
+
+type PostSubscriptionPayload {
+    mutation: ContentAction
+    node: Post!
+}
+
+type CommentSubscriptionPayload {
+    mutation: ContentAction
+    node: Comment
+}

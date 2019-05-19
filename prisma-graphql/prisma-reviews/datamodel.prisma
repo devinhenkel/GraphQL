@@ -1,12 +1,15 @@
 type User {
-  id: ID! @unique
+  id: ID! @unique @id
   username: String! @unique
+  firstname: String
+  lastname: String
   email: String! @unique
+  password: String!
   projects: [Project]!
 }
 
 type Project {
-  id: ID! @unique
+  id: ID! @unique @id
   title: String!
   description: String
   issues: [Issue]!
@@ -14,11 +17,11 @@ type Project {
 }
 
 type Issue {
-  id: ID! @unique
+  id: ID! @unique @id
   title: String!
   description: String
-  severity: Severity
-  type: IssueType!
+  severity: Severity 
+  type: IssueType! 
   owner: User!
   project: [Project!]!
 }
