@@ -1,11 +1,13 @@
+# import UserOrderByInput, PostOrderByInput, CommentOrderByInput from './generated/prisma.graphql'
+
 type Query {
     me: User!
     post(where: PostWhereUniqueInput!): Post
-    posts(id: ID, query: String, sort: String, sortdir: Int): [Post!]
-    myPosts(query: String): [Post]
-    users(query: String): [User]
+    posts(id: ID, query: String, sort: String, sortdir: Int, first: Int, skip: Int, after: String, orderBy: PostOrderByInput): [Post!]
+    myPosts(query: String, first: Int, skip: Int, after: String, orderBy: PostOrderByInput): [Post]
+    users(query: String, first: Int, skip: Int, after: String, orderBy: UserOrderByInput): [User]
     user(where: UserWhereUniqueInput): User
-    comments(where: CommentWhereInput): [Comment]
+    comments(where: CommentWhereInput, first: Int, skip: Int, after: String, orderBy: CommentOrderByInput): [Comment]
     comment(id: ID!): Comment!
     grades: [Int!]!
     add(numbers: [Float!]!): Float!
@@ -86,7 +88,6 @@ input UpdatePostInput {
 
 input AddCommentInput {
     text: String!
-    author: ID!
     post: ID!
 }
 
@@ -129,6 +130,8 @@ type User {
     posts: [Post]
     comments: [Comment]
     roles: [Role]
+    createdAt: String!
+    updatedAt: String!
 }
 
 type Post {
@@ -138,6 +141,8 @@ type Post {
     published: Boolean!
     author: User!
     comments: [Comment]
+    createdAt: String!
+    updatedAt: String!
 }
 
 type Comment {
@@ -145,6 +150,8 @@ type Comment {
     text: String!
     author: User!
     post: Post!
+    createdAt: String!
+    updatedAt: String!
 }
 
 enum ContentAction {

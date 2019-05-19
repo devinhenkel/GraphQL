@@ -23,7 +23,11 @@ const Query = {
     async posts(parent, args, { prisma, request }, info) {
         const userId = getUserId(request, false)
         
-        let opArgs = {}
+        let opArgs = {
+            first: args.first,
+            skip: args.skip,
+            after: args.after
+        }
 
         if (args.query) {
             opArgs.where = {
@@ -66,7 +70,11 @@ const Query = {
     async myPosts(parent, args, {prisma, request}, info) {
         const userId = getUserId(request)
 
-        let opArgs = {}
+        let opArgs = {
+            first: args.first,
+            skip: args.skip,
+            after: args.after
+        }
         
         opArgs.where = {
             author: {
@@ -94,7 +102,11 @@ const Query = {
         const userId = getUserId(request, false)
         const isAdmin = await getUserAdmin(prisma, userId)
 
-        const opArgs = {}
+        const opArgs = {
+            first: args.first,
+            skip: args.skip,
+            after: args.after
+        }
 
         /* if (!isAdmin) {
             opArgs.where = { id: userId }
@@ -124,7 +136,11 @@ const Query = {
         return prisma.query.user(opArgs, info)
     },
     comments(parent, args, { db, prisma }, info) {
-        let opArgs = {}
+        let opArgs = {
+            first: args.first,
+            skip: args.skip,
+            after: args.after
+        }
         if(args.where) {
             opArgs.where = args.where
         }

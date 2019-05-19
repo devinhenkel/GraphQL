@@ -208,7 +208,9 @@ const Mutation = {
             data: args.data
         }, info)        
     },
-    async createComment(parent, args, { prisma, pubsub }, info) {
+    async createComment(parent, args, { prisma, request }, info) {
+        const userId = getUserId(request)
+
         const postExists = await prisma.exists.Post({id: args.data.post})
         if (!postExists) {
             throw new Error('Post does not exist')
@@ -222,7 +224,7 @@ const Mutation = {
         newComment.text = args.data.text
         newComment.author = {} 
         newComment.author.connect = {}
-        newComment.author.connect.id = args.data.author
+        newComment.author.connect.id = userId
         
         newComment.post = {} 
         newComment.post.connect = {}

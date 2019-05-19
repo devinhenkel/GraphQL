@@ -8,6 +8,8 @@ type User {
   posts: [Post!]! @relation(name: "PostByUser", onDelete: CASCADE)
   comments: [Comment!]! @relation(name:"CommentByUser", onDelete: CASCADE)
   roles: [Role]
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 enum Role {
@@ -24,6 +26,8 @@ type Post {
   author: User! @relation(name: "PostByUser", onDelete: SET_NULL)
   published: Boolean!
   comments: [Comment!]! @relation(name: "CommentToPost", onDelete: CASCADE)
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Comment {
@@ -31,4 +35,6 @@ type Comment {
     text: String!
     author: User! @relation(name: "CommentByUser", onDelete: SET_NULL)
     post: Post! @relation(name: "CommentToPost", onDelete: SET_NULL)
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
